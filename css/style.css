@@ -453,6 +453,7 @@ h1, h2, h3, h4, h5 {
 }
 
 /* ---------- 8. INTRO SECTION ---------- */
+/* ---------- 8. INTRO SECTION ---------- */
 .intro-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -462,12 +463,15 @@ h1, h2, h3, h4, h5 {
 
 .intro-media {
   position: relative;
+  width: 100%;
+  padding: 14px; /* Frame aur image ke beech ka gap. Ise tum apne hisaab se kam-zyada kar sakte ho */
+  line-height: 0; /* Image ke niche jo faltu space aati hai, use hatane ke liye */
 }
 
 .intro-media::before {
   content: "";
   position: absolute;
-  inset: -16px 16px 16px -16px;
+  inset: 0; /* Frame exactly container ke size par banega */
   border: 1px solid var(--gold);
   border-radius: var(--radius);
   z-index: 0;
@@ -478,10 +482,11 @@ h1, h2, h3, h4, h5 {
   position: relative;
   z-index: 1;
   width: 100%;
-  height: 620px;
+  height: auto; /* SABSE IMPORTANT: Image apni natural height legi, koi fix height nahi */
   object-fit: cover;
   border-radius: var(--radius);
   filter: brightness(0.92);
+  display: block;
 }
 
 .intro-copy p {
@@ -670,7 +675,7 @@ h1, h2, h3, h4, h5 {
   padding: 110px 0;
   background:
     linear-gradient(rgba(8, 8, 8, 0.82), rgba(8, 8, 8, 0.9)),
-    url("https://picsum.photos/seed/cfs-cta/1600/900") center/cover fixed;
+    url("../images/wedding12.webp") center/cover fixed;
   text-align: center;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);

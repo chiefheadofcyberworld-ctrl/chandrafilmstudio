@@ -96,7 +96,7 @@ Instagram/YouTube links ready ho jaayein to `"sameAs": ["https://instagram.com/.
 ```
 
 ## 5. Image SEO checklist
-- File name: `haldi-ceremony-photography-dinara.jpg`
+- File name: `haldi-ceremony-photography-dinara.webp`
 - Alt: `alt="Haldi ceremony photography in Dinara, Rohtas by Chandra Film Studio"`
 - Gallery images mein `loading="lazy"`, hero image mein nahi.
 - Width/height attributes do.
