@@ -463,15 +463,14 @@ h1, h2, h3, h4, h5 {
 
 .intro-media {
   position: relative;
+  padding: 16px; /* Frame aur image ke beech ka gap */
   width: 100%;
-  padding: 14px; /* Frame aur image ke beech ka gap. Ise tum apne hisaab se kam-zyada kar sakte ho */
-  line-height: 0; /* Image ke niche jo faltu space aati hai, use hatane ke liye */
 }
 
 .intro-media::before {
   content: "";
   position: absolute;
-  inset: 0; /* Frame exactly container ke size par banega */
+  inset: 0; /* Frame perfectly image ke chaaro taraf rahega */
   border: 1px solid var(--gold);
   border-radius: var(--radius);
   z-index: 0;
@@ -482,7 +481,7 @@ h1, h2, h3, h4, h5 {
   position: relative;
   z-index: 1;
   width: 100%;
-  height: auto; /* SABSE IMPORTANT: Image apni natural height legi, koi fix height nahi */
+  height: 620px; /* Laptop par image badi aur lambi dikhegi */
   object-fit: cover;
   border-radius: var(--radius);
   filter: brightness(0.92);
