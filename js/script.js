@@ -223,9 +223,9 @@ if (lightbox && lightboxImg && lightboxClose && galleryLinks.length > 0) {
           return;
         }
 
-        testimonialContainer.innerHTML = "";
+       testimonialContainer.innerHTML = "";
 
-       reviews.forEach(review => {
+reviews.forEach(review => {
   const blockquote = document.createElement("blockquote");
   blockquote.className = "testi";
 
@@ -240,12 +240,6 @@ if (lightbox && lightboxImg && lightboxClose && galleryLinks.length > 0) {
 
   testimonialContainer.appendChild(blockquote);
 });
-
-          blockquote.appendChild(reviewText);
-          blockquote.appendChild(cite);
-
-          testimonialContainer.appendChild(blockquote);
-        });
       })
       .catch(err => {
         console.error("Testimonials error:", err);
@@ -254,4 +248,4 @@ if (lightbox && lightboxImg && lightboxClose && galleryLinks.length > 0) {
       });
   }
 
-}); // <-- Ye aakhri bracket DOMContentLoaded ko band karega
+}); // DOMContentLoaded ends
