@@ -111,9 +111,39 @@
           Let's talk about your <span class="gold">special day</span>
         </h2>
         <p class="section-sub">
-          We'd love to hear from you. Reach out to us via phone or WhatsApp, or visit our studio in Dinara, Rohtas, Bihar to check date availability for your wedding or event.
+          We'd love to hear from you. Fill out the enquiry form below or reach out to us via phone/WhatsApp to check date availability for your wedding or event.
         </p>
       </div>
+
+      <!-- ================= NEW ENQUIRY FORM ================= -->
+      <div class="enquiry-form-container reveal">
+        <h3 class="section-title" style="font-size: 2rem; margin-bottom: 20px; text-align: center;">Send an <span class="gold">Enquiry</span></h3>
+        <form id="enquiryForm" class="enquiry-form">
+          <div class="form-row">
+            <div class="form-group">
+              <input type="text" id="name" placeholder="Your Name" required>
+            </div>
+            <div class="form-group">
+              <input type="tel" id="phone" placeholder="Phone Number" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <select id="eventType" required>
+              <option value="" disabled selected>Select Event Type</option>
+              <option value="Wedding">Wedding</option>
+              <option value="Pre-Wedding">Pre-Wedding</option>
+              <option value="Birthday/Event">Birthday / Event</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <textarea id="message" rows="4" placeholder="Your Message / Event Date" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-gold" id="submitBtn" style="width: 100%;">Send Enquiry</button>
+        </form>
+        <div id="formMessage" style="margin-top: 15px; font-weight: 500; text-align: center;"></div>
+      </div>
+      <!-- ================= END ENQUIRY FORM ================= -->
 
       <div class="contact-grid">
 
@@ -158,17 +188,6 @@
               <p>Monday - Sunday<br />10:00 AM - 8:00 PM</p>
             </div>
           </div>
-
-          <!-- SOCIAL LINKS: asli links ready hone par is block ko uncomment karke # ki jagah URL daalein
-          <div class="contact-socials">
-            <h4>Follow Us</h4>
-            <div class="social-links">
-              <a href="INSTAGRAM_URL" target="_blank" rel="noopener" aria-label="Instagram">Instagram</a>
-              <a href="FACEBOOK_URL" target="_blank" rel="noopener" aria-label="Facebook">Facebook</a>
-              <a href="YOUTUBE_URL" target="_blank" rel="noopener" aria-label="YouTube">YouTube</a>
-            </div>
-          </div>
-          -->
 
         </div>
 
@@ -236,11 +255,6 @@
         <ul>
           <li>Dinara, Rohtas, Bihar</li>
           <li><a href="tel:+919798112812">+91 97981 12812</a></li>
-          <!-- Social links ready hone par yahan add karein:
-          <li><a href="INSTAGRAM_URL" target="_blank" rel="noopener">Instagram</a></li>
-          <li><a href="FACEBOOK_URL" target="_blank" rel="noopener">Facebook</a></li>
-          <li><a href="YOUTUBE_URL" target="_blank" rel="noopener">YouTube</a></li>
-          -->
         </ul>
       </div>
 

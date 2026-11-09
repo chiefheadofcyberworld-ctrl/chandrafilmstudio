@@ -453,7 +453,6 @@ h1, h2, h3, h4, h5 {
 }
 
 /* ---------- 8. INTRO SECTION ---------- */
-/* ---------- 8. INTRO SECTION ---------- */
 .intro-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1529,5 +1528,66 @@ h1, h2, h3, h4, h5 {
   }
   .contact-map {
     min-height: 350px;
+  }
+}
+
+/* ---------- 26. DYNAMIC ENQUIRY FORM (NEW) ---------- */
+.enquiry-form-container {
+  background: var(--black-card);
+  padding: 40px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(201, 164, 92, 0.2);
+  margin-bottom: 60px; /* Contact details aur form ke beech space */
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.form-row {
+  display: flex;
+  gap: 20px;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group input, 
+.form-group select, 
+.form-group textarea {
+  width: 100%;
+  padding: 15px;
+  background: var(--black);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--white);
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.form-group input:focus, 
+.form-group select:focus, 
+.form-group textarea:focus {
+  border-color: var(--gold);
+}
+
+.form-group select option {
+  background: var(--black-card);
+}
+
+@media (max-width: 600px) {
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  .enquiry-form-container {
+    padding: 25px 20px;
   }
 }
