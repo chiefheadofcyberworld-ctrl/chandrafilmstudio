@@ -3,7 +3,7 @@
    ========================================================= */
 
 document.addEventListener("DOMContentLoaded", function () {
-console.log("SCRIPT LOADED SUCCESSFULLY!");
+;
   /* ---------- 1. MOBILE MENU TOGGLE ---------- */
   const navToggle = document.getElementById("navToggle");
   const nav = document.getElementById("nav");
@@ -165,7 +165,7 @@ if (lightbox && galleryLinks.length > 0) {
     enquiryForm.addEventListener("submit", async function (e) {
       e.preventDefault();
       
-      console.log("FORM SUBMIT BUTTON CLICKED!"); // Debugging ke liye
+     
 
       const submitBtn = document.getElementById("submitBtn");
       const formMessage = document.getElementById("formMessage");

