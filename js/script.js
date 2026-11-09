@@ -225,15 +225,21 @@ if (lightbox && lightboxImg && lightboxClose && galleryLinks.length > 0) {
 
         testimonialContainer.innerHTML = "";
 
-        reviews.forEach(review => {
-          const blockquote = document.createElement("blockquote");
-          blockquote.className = "testi reveal";
+       reviews.forEach(review => {
+  const blockquote = document.createElement("blockquote");
+  blockquote.className = "testi";
 
-          const reviewText = document.createElement("p");
-          reviewText.textContent = `"${review.text || ""}"`;
+  const reviewText = document.createElement("p");
+  reviewText.textContent = `"${review.text || ""}"`;
 
-          const cite = document.createElement("cite");
-          cite.textContent = `— ${review.name || "Client"}, ${review.event || "Event"}`;
+  const cite = document.createElement("cite");
+  cite.textContent = `— ${review.name || "Client"}, ${review.event || "Event"}`;
+
+  blockquote.appendChild(reviewText);
+  blockquote.appendChild(cite);
+
+  testimonialContainer.appendChild(blockquote);
+});
 
           blockquote.appendChild(reviewText);
           blockquote.appendChild(cite);
