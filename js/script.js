@@ -3,7 +3,7 @@
    ========================================================= */
 
 document.addEventListener("DOMContentLoaded", function () {
-
+console.log("SCRIPT LOADED SUCCESSFULLY!");
   /* ---------- 1. MOBILE MENU TOGGLE ---------- */
   const navToggle = document.getElementById("navToggle");
   const nav = document.getElementById("nav");
@@ -157,4 +157,53 @@ if (lightbox && galleryLinks.length > 0) {
   });
   
 }
-});
+
+  /* ---------- 8. ENQUIRY FORM SUBMISSION ---------- */
+  const enquiryForm = document.getElementById("enquiryForm");
+  
+  if (enquiryForm) {
+    enquiryForm.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      
+      console.log("FORM SUBMIT BUTTON CLICKED!"); // Debugging ke liye
+
+      const submitBtn = document.getElementById("submitBtn");
+      const formMessage = document.getElementById("formMessage");
+      
+      submitBtn.textContent = "Sending...";
+      submitBtn.disabled = true;
+      formMessage.textContent = "";
+
+      const formData = {
+        name: document.getElementById("name").value,
+        phone: document.getElementById("phone").value,
+        eventType: document.getElementById("eventType").value,
+        message: document.getElementById("message").value,
+      };
+
+      try {
+        const response = await fetch("/api/enquiry", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+          formMessage.textContent = "Success! Your enquiry has been sent. We will contact you soon.";
+          formMessage.style.color = "#25D366"; // Green
+          enquiryForm.reset();
+        } else {
+          throw new Error("Failed to send");
+        }
+      } catch (error) {
+        console.error("ERROR:", error); // Console me error dikhane ke liye
+        formMessage.textContent = "Oops! Something went wrong. Please call us directly.";
+        formMessage.style.color = "#ff4444"; // Red
+      } finally {
+        submitBtn.textContent = "Send Enquiry";
+        submitBtn.disabled = false;
+      }
+    });
+  }
+
+}); // <-- Ye aakhri bracket DOMContentLoaded ko band karega
