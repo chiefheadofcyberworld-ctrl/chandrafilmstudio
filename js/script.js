@@ -130,7 +130,7 @@ const lightbox = document.getElementById("lightbox");
 const lightboxImg = document.getElementById("lightboxImg");
 const lightboxClose = document.getElementById("lightboxClose");
 
-if (lightbox && galleryLinks.length > 0) {
+if (lightbox && lightboxImg && lightboxClose && galleryLinks.length > 0) {
   galleryLinks.forEach(function (link) {
     link.addEventListener("click", function (e) {
       e.preventDefault(); // Prevent page jump
@@ -161,7 +161,9 @@ if (lightbox && galleryLinks.length > 0) {
   /* ---------- 8. ENQUIRY FORM SUBMISSION ---------- */
   const enquiryForm = document.getElementById("enquiryForm");
   
-  if (enquiryForm) {
+  if (enquiryForm &&
+    document.getElementById("submitBtn") &&
+    document.getElementById("formMessage")) {
     enquiryForm.addEventListener("submit", async function (e) {
       e.preventDefault();
       
@@ -204,6 +206,46 @@ if (lightbox && galleryLinks.length > 0) {
         submitBtn.disabled = false;
       }
     });
+  }
+  /* ---------- 9. FETCH TESTIMONIALS ---------- */
+  const testimonialContainer = document.getElementById("testimonialContainer");
+
+  if (testimonialContainer) {
+    fetch("/api/testimonials")
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to fetch reviews");
+        return res.json();
+      })
+      .then(reviews => {
+        if (!Array.isArray(reviews) || reviews.length === 0) {
+          testimonialContainer.innerHTML =
+            `<p style="text-align: center; color: var(--grey);">No reviews yet.</p>`;
+          return;
+        }
+
+        testimonialContainer.innerHTML = "";
+
+        reviews.forEach(review => {
+          const blockquote = document.createElement("blockquote");
+          blockquote.className = "testi reveal";
+
+          const reviewText = document.createElement("p");
+          reviewText.textContent = `"${review.text || ""}"`;
+
+          const cite = document.createElement("cite");
+          cite.textContent = `— ${review.name || "Client"}, ${review.event || "Event"}`;
+
+          blockquote.appendChild(reviewText);
+          blockquote.appendChild(cite);
+
+          testimonialContainer.appendChild(blockquote);
+        });
+      })
+      .catch(err => {
+        console.error("Testimonials error:", err);
+        testimonialContainer.innerHTML =
+          `<p style="text-align: center; color: var(--grey);">Failed to load reviews.</p>`;
+      });
   }
 
 }); // <-- Ye aakhri bracket DOMContentLoaded ko band karega

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin - Add Review</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Form ko pehle chhupa diya hai taaki bina password ke na dikhe */
+    .admin-container { 
+      max-width: 600px; 
+      margin: 100px auto; 
+      padding: 40px; 
+      background: var(--black-card); 
+      border-radius: var(--radius); 
+      display: none; /* 👈 Ye important hai */
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-container" id="adminPanel">
+    <h2 class="section-title">Add <span class="gold">Review</span></h2>
+    <form id="reviewForm">
+      <div class="form-group"><input type="text" id="clientName" placeholder="Client Name" required></div>
+      <div class="form-group"><input type="text" id="clientEvent" placeholder="Event (e.g. Wedding, Birthday)" required></div>
+      <div class="form-group"><textarea id="clientText" rows="4" placeholder="Review Text" required></textarea></div>
+      <button type="submit" class="btn btn-gold" style="width: 100%;">Add Review</button>
+    </form>
+    <p id="adminMsg" style="margin-top: 15px; text-align: center;"></p>
+  </div>
+
+  <script>
+    // 1. PASSWORD SETTING
+    const correctPassword = "chandrafilmstudio2026@pawan"; // 👈 Yahan apna password set karo
+
+    // 2. PASSWORD CHECK LOGIC
+    const enteredPassword = prompt("Enter Admin Password:");
+
+    if (enteredPassword === correctPassword) {
+      // Agar password sahi hai, toh form dikhao
+      document.getElementById("adminPanel").style.display = "block";
+      
+      // Form submit ka logic (sirf tab chalega jab password sahi ho)
+      document.getElementById("reviewForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
+        const btn = this.querySelector("button");
+        const msg = document.getElementById("adminMsg");
+        btn.textContent = "Adding...";
+
+        const reviewData = {
+          name: document.getElementById("clientName").value,
+          event: document.getElementById("clientEvent").value,
+          text: document.getElementById("clientText").value
+        };
+
+        try {
+          const res = await fetch("/api/testimonials", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(reviewData)
+          });
+          if (res.ok) {
+            msg.textContent = "Review added successfully!";
+            msg.style.color = "#25D366";
+            this.reset();
+          } else {
+            throw new Error("Failed");
+          }
+        } catch (err) {
+          msg.textContent = "Error adding review.";
+          msg.style.color = "red";
+        } finally {
+          btn.textContent = "Add Review";
+        }
+      });
+
+    } else {
+      // Agar password galat hai, toh page par kuch nahi dikhega
+      document.body.innerHTML = "<h2 style='color:red; text-align:center; margin-top:100px; font-family: sans-serif;'>Access Denied. Incorrect Password.</h2>";
+    }
+  </script>
+</body>
+</html>

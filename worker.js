@@ -42,7 +42,55 @@ export default {
         return new Response(JSON.stringify({ success: false, error: err.message }), { status: 500, headers: { "Content-Type": "application/json" } });
       }
     }
+    // ---------- TESTIMONIALS API ----------
+    if (url.pathname === "/api/testimonials") {
 
+      // GET: Saare reviews fetch karna
+      if (request.method === "GET") {
+        const reviews = await env.TESTIMONIALS_KV.get("reviews");
+
+        return new Response(reviews || "[]", {
+          headers: { "Content-Type": "application/json" }
+        });
+      }
+
+      // POST: Naya review add karna
+      if (request.method === "POST") {
+        try {
+          const newReview = await request.json();
+
+          let reviews = JSON.parse(
+            await env.TESTIMONIALS_KV.get("reviews") || "[]"
+          );
+
+          // Naya review sabse upar
+          reviews.unshift(newReview);
+
+          await env.TESTIMONIALS_KV.put(
+            "reviews",
+            JSON.stringify(reviews)
+          );
+
+          return new Response(
+            JSON.stringify({ success: true }),
+            {
+              headers: { "Content-Type": "application/json" }
+            }
+          );
+
+        } catch (error) {
+          return new Response(
+            JSON.stringify({ error: error.message }),
+            {
+              status: 500,
+              headers: { "Content-Type": "application/json" }
+            }
+          );
+        }
+      }
+
+      return new Response("Method Not Allowed", { status: 405 });
+    }
     // Baaki saari requests (Website ke pages aur photos) normally serve karo
     return env.ASSETS.fetch(request);
   }
