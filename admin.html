@@ -1,82 +1,768 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Admin - Add Review</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Chandra Film Studio</title>
   <link rel="stylesheet" href="css/style.css">
+
   <style>
-    /* Form ko pehle chhupa diya hai taaki bina password ke na dikhe */
-    .admin-container { 
-      max-width: 600px; 
-      margin: 100px auto; 
-      padding: 40px; 
-      background: var(--black-card); 
-      border-radius: var(--radius); 
-      display: none; /* 👈 Ye important hai */
+    .admin-container {
+      max-width: 750px;
+      margin: 70px auto;
+      padding: 30px;
+      background: var(--black-card);
+      border-radius: var(--radius);
+    }
+
+    .admin-hidden {
+      display: none;
+    }
+
+    .admin-review,
+    .admin-gallery-card {
+      padding: 16px;
+      margin-top: 15px;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+    }
+
+    .admin-review p {
+      overflow-wrap: anywhere;
+    }
+
+    .delete-btn {
+      margin-top: 10px;
+      background: #c62828;
+      color: white;
+      border: none;
+      padding: 9px 16px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .delete-btn:disabled,
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .admin-message {
+      margin-top: 15px;
+      text-align: center;
+      overflow-wrap: anywhere;
+    }
+
+    .gallery-admin-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .admin-gallery-card img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+
+    .admin-gallery-card p {
+      margin: 8px 0;
+      overflow-wrap: anywhere;
+    }
+
+    .admin-gallery-card select,
+    .admin-gallery-card input,
+    #galleryCategory,
+    #galleryImage {
+      max-width: 100%;
+    }
+
+    .admin-section {
+      margin-top: 30px;
+    }
+
+    .admin-container hr {
+      margin: 30px 0;
     }
   </style>
 </head>
+
 <body>
-  <div class="admin-container" id="adminPanel">
-    <h2 class="section-title">Add <span class="gold">Review</span></h2>
-    <form id="reviewForm">
-      <div class="form-group"><input type="text" id="clientName" placeholder="Client Name" required></div>
-      <div class="form-group"><input type="text" id="clientEvent" placeholder="Event (e.g. Wedding, Birthday)" required></div>
-      <div class="form-group"><textarea id="clientText" rows="4" placeholder="Review Text" required></textarea></div>
-      <button type="submit" class="btn btn-gold" style="width: 100%;">Add Review</button>
+
+  <!-- LOGIN SECTION -->
+  <div class="admin-container" id="loginPanel">
+
+    <h2 class="section-title">
+      Admin <span class="gold">Login</span>
+    </h2>
+
+    <form id="loginForm">
+
+      <div class="form-group">
+        <input
+          type="password"
+          id="adminPassword"
+          placeholder="Enter Admin Password"
+          required
+          autocomplete="current-password"
+        >
+      </div>
+
+      <button type="submit" class="btn btn-gold" id="loginBtn">
+        Login
+      </button>
+
     </form>
-    <p id="adminMsg" style="margin-top: 15px; text-align: center;"></p>
+
+    <p id="loginMsg" class="admin-message"></p>
+
   </div>
 
-  <script>
-    // 1. PASSWORD SETTING
-    const correctPassword = "chandrafilmstudio2026@pawan"; // 👈 Yahan apna password set karo
 
-    // 2. PASSWORD CHECK LOGIC
-    const enteredPassword = prompt("Enter Admin Password:");
+  <!-- ADMIN PANEL -->
+  <div class="admin-container admin-hidden" id="adminPanel">
 
-    if (enteredPassword === correctPassword) {
-      // Agar password sahi hai, toh form dikhao
-      document.getElementById("adminPanel").style.display = "block";
-      
-      // Form submit ka logic (sirf tab chalega jab password sahi ho)
-      document.getElementById("reviewForm").addEventListener("submit", async function(e) {
-        e.preventDefault();
-        const btn = this.querySelector("button");
-        const msg = document.getElementById("adminMsg");
-        btn.textContent = "Adding...";
+    <h2 class="section-title">
+      Admin <span class="gold">Dashboard</span>
+    </h2>
 
-        const reviewData = {
-          name: document.getElementById("clientName").value,
-          event: document.getElementById("clientEvent").value,
-          text: document.getElementById("clientText").value
-        };
+    <button type="button" class="delete-btn" id="logoutBtn">
+      Logout
+    </button>
 
-        try {
-          const res = await fetch("/api/testimonials", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(reviewData)
-          });
-          if (res.ok) {
-            msg.textContent = "Review added successfully!";
-            msg.style.color = "#25D366";
-            this.reset();
-          } else {
-            throw new Error("Failed");
-          }
-        } catch (err) {
-          msg.textContent = "Error adding review.";
-          msg.style.color = "red";
-        } finally {
-          btn.textContent = "Add Review";
+    <!-- GALLERY MANAGEMENT -->
+    <section class="admin-section">
+
+      <hr>
+
+      <h2>Manage <span class="gold">Gallery</span></h2>
+
+      <h3>Upload New Image</h3>
+
+      <form id="galleryForm">
+
+        <div class="form-group">
+          <label for="galleryImage">Select Image</label>
+          <input
+            type="file"
+            id="galleryImage"
+            accept="image/*"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="galleryCategory">Select Category</label>
+
+          <select id="galleryCategory" required>
+            <option value="">Choose Category</option>
+            <option value="Wedding">Wedding</option>
+            <option value="Events">Events</option>
+          </select>
+        </div>
+
+        <button
+          type="submit"
+          class="btn btn-gold"
+          id="galleryUploadBtn"
+        >
+          Upload Image
+        </button>
+
+      </form>
+
+      <p id="galleryMsg" class="admin-message"></p>
+
+      <hr>
+
+      <h3>Existing Gallery Images</h3>
+
+      <div id="galleryContainer">
+        Loading gallery...
+      </div>
+
+    </section>
+
+
+    <!-- REVIEW MANAGEMENT -->
+    <section class="admin-section">
+
+      <hr>
+
+      <h2>Manage <span class="gold">Reviews</span></h2>
+
+      <h3>Add New Review</h3>
+
+      <form id="reviewForm">
+
+        <div class="form-group">
+          <input
+            type="text"
+            id="clientName"
+            placeholder="Client Name"
+            maxlength="80"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <input
+            type="text"
+            id="clientEvent"
+            placeholder="Event (Wedding, Birthday etc.)"
+            maxlength="80"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <textarea
+            id="clientText"
+            rows="4"
+            placeholder="Review Text"
+            maxlength="1000"
+            required
+          ></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-gold" id="addBtn">
+          Add Review
+        </button>
+
+      </form>
+
+      <p id="adminMsg" class="admin-message"></p>
+
+      <hr>
+
+      <h3>Existing Reviews</h3>
+
+      <div id="reviewContainer">
+        Loading reviews...
+      </div>
+
+    </section>
+
+  </div>
+
+
+<script>
+
+  let currentPassword = "";
+
+  const loginPanel = document.getElementById("loginPanel");
+  const adminPanel = document.getElementById("adminPanel");
+  const loginForm = document.getElementById("loginForm");
+  const loginMsg = document.getElementById("loginMsg");
+  const adminMsg = document.getElementById("adminMsg");
+  const reviewContainer = document.getElementById("reviewContainer");
+
+  const galleryForm = document.getElementById("galleryForm");
+  const galleryImage = document.getElementById("galleryImage");
+  const galleryCategory = document.getElementById("galleryCategory");
+  const galleryMsg = document.getElementById("galleryMsg");
+  const galleryContainer = document.getElementById("galleryContainer");
+
+
+  // HELPER: API ERROR MESSAGE
+  async function getErrorMessage(response) {
+    try {
+      const data = await response.json();
+      return data.error || data.details || `Request failed (${response.status})`;
+    } catch {
+      return `Request failed (${response.status})`;
+    }
+  }
+
+
+  // LOGIN
+  loginForm.addEventListener("submit", async function(e) {
+
+    e.preventDefault();
+
+    const password = document.getElementById("adminPassword").value;
+    const btn = document.getElementById("loginBtn");
+
+    btn.disabled = true;
+    btn.textContent = "Verifying...";
+    loginMsg.textContent = "";
+
+    try {
+
+      const res = await fetch("/api/admin/verify", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${password}`
         }
       });
 
-    } else {
-      // Agar password galat hai, toh page par kuch nahi dikhega
-      document.body.innerHTML = "<h2 style='color:red; text-align:center; margin-top:100px; font-family: sans-serif;'>Access Denied. Incorrect Password.</h2>";
+      if (!res.ok) {
+        throw new Error("Incorrect password");
+      }
+
+      currentPassword = password;
+
+      loginPanel.classList.add("admin-hidden");
+      adminPanel.classList.remove("admin-hidden");
+
+      await Promise.all([
+        loadReviews(),
+        loadGallery()
+      ]);
+
+    } catch (error) {
+
+      loginMsg.textContent = "Incorrect password. Please try again.";
+      loginMsg.style.color = "red";
+
+    } finally {
+
+      btn.disabled = false;
+      btn.textContent = "Login";
+
     }
-  </script>
+
+  });
+
+
+  // LOAD REVIEWS
+  async function loadReviews() {
+
+    reviewContainer.textContent = "Loading reviews...";
+
+    try {
+
+      const res = await fetch("/api/testimonials", {
+        cache: "no-store"
+      });
+
+      if (!res.ok) {
+        throw new Error("Unable to load reviews");
+      }
+
+      const reviews = await res.json();
+
+      reviewContainer.replaceChildren();
+
+      if (!Array.isArray(reviews) || reviews.length === 0) {
+
+        reviewContainer.textContent = "No reviews available.";
+        return;
+
+      }
+
+      reviews.forEach(review => {
+
+        const card = document.createElement("div");
+        card.className = "admin-review";
+
+        const name = document.createElement("h4");
+        name.textContent = review.name || "Unknown";
+
+        const event = document.createElement("p");
+        event.textContent = review.event || "";
+
+        const text = document.createElement("p");
+        text.textContent = review.text || "";
+
+        card.append(name, event, text);
+
+        if (review.id) {
+
+          const deleteBtn = document.createElement("button");
+
+          deleteBtn.type = "button";
+          deleteBtn.className = "delete-btn";
+          deleteBtn.textContent = "Delete Review";
+
+          deleteBtn.addEventListener("click", () => {
+            deleteReview(review.id, deleteBtn);
+          });
+
+          card.appendChild(deleteBtn);
+
+        } else {
+
+          const note = document.createElement("p");
+          note.textContent = "Legacy review: ID migration required before deletion.";
+          card.appendChild(note);
+
+        }
+
+        reviewContainer.appendChild(card);
+
+      });
+
+    } catch (error) {
+
+      reviewContainer.textContent = "Error loading reviews.";
+
+    }
+
+  }
+
+
+  // LOAD GALLERY
+  async function loadGallery() {
+
+    galleryContainer.textContent = "Loading gallery...";
+
+    try {
+
+      const res = await fetch("/api/gallery", {
+        cache: "no-store"
+      });
+
+      if (!res.ok) {
+        throw new Error("Unable to load gallery");
+      }
+
+      const images = await res.json();
+
+      galleryContainer.replaceChildren();
+
+      if (!Array.isArray(images) || images.length === 0) {
+
+        galleryContainer.textContent = "No gallery images available.";
+        return;
+
+      }
+
+      const grid = document.createElement("div");
+      grid.className = "gallery-admin-grid";
+
+      images.forEach(item => {
+
+        const card = document.createElement("div");
+        card.className = "admin-gallery-card";
+
+        const img = document.createElement("img");
+        img.src = item.secure_url;
+        img.alt = "Gallery image";
+        img.loading = "lazy";
+
+        const category = document.createElement("p");
+        category.textContent = "Category: " + (item.category || "Unknown");
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.type = "button";
+        deleteBtn.className = "delete-btn";
+        deleteBtn.textContent = "Delete Image";
+
+        deleteBtn.addEventListener("click", () => {
+          deleteGalleryImage(item.id, deleteBtn);
+        });
+
+        card.append(img, category, deleteBtn);
+        grid.appendChild(card);
+
+      });
+
+      galleryContainer.appendChild(grid);
+
+    } catch (error) {
+
+      galleryContainer.textContent = "Error loading gallery.";
+
+    }
+
+  }
+
+
+  // UPLOAD GALLERY IMAGE
+  galleryForm.addEventListener("submit", async function(e) {
+
+    e.preventDefault();
+
+    const file = galleryImage.files[0];
+    const category = galleryCategory.value;
+    const btn = document.getElementById("galleryUploadBtn");
+
+    if (!file || !file.type.startsWith("image/")) {
+
+      galleryMsg.textContent = "Please select a valid image.";
+      galleryMsg.style.color = "red";
+      return;
+
+    }
+
+    if (!["Wedding", "Events"].includes(category)) {
+
+      galleryMsg.textContent = "Please select a valid category.";
+      galleryMsg.style.color = "red";
+      return;
+
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Preparing upload...";
+
+    galleryMsg.textContent = "";
+    galleryMsg.style.color = "";
+
+    try {
+
+      // STEP 1: REQUEST SIGNED UPLOAD DETAILS
+      const signRes = await fetch("/api/gallery/sign", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${currentPassword}`
+        }
+      });
+
+      if (!signRes.ok) {
+        throw new Error(await getErrorMessage(signRes));
+      }
+
+      const signData = await signRes.json();
+
+      if (
+        !signData.cloud_name ||
+        !signData.api_key ||
+        !signData.upload_preset ||
+        !signData.timestamp ||
+        !signData.signature
+      ) {
+        throw new Error("Invalid Cloudinary signing response.");
+      }
+
+
+      // STEP 2: UPLOAD IMAGE DIRECTLY TO CLOUDINARY
+      btn.textContent = "Uploading image...";
+
+      const formData = new FormData();
+
+      formData.append("file", file);
+      formData.append("api_key", signData.api_key);
+      formData.append("upload_preset", signData.upload_preset);
+      formData.append("timestamp", signData.timestamp);
+      formData.append("signature", signData.signature);
+
+      const cloudinaryRes = await fetch(
+        `https://api.cloudinary.com/v1_1/${signData.cloud_name}/image/upload`,
+        {
+          method: "POST",
+          body: formData
+        }
+      );
+
+      if (!cloudinaryRes.ok) {
+        throw new Error(await getErrorMessage(cloudinaryRes));
+      }
+
+      const cloudinaryData = await cloudinaryRes.json();
+
+      if (!cloudinaryData.secure_url || !cloudinaryData.public_id) {
+        throw new Error("Cloudinary did not return image details.");
+      }
+
+
+      // STEP 3: SAVE IMAGE DETAILS IN CLOUDFLARE KV
+      btn.textContent = "Saving image details...";
+
+      const saveRes = await fetch("/api/gallery", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${currentPassword}`
+        },
+        body: JSON.stringify({
+          secure_url: cloudinaryData.secure_url,
+          public_id: cloudinaryData.public_id,
+          category: category
+        })
+      });
+
+      if (!saveRes.ok) {
+        throw new Error(await getErrorMessage(saveRes));
+      }
+
+      galleryMsg.textContent = "Image uploaded successfully!";
+      galleryMsg.style.color = "#25D366";
+
+      galleryForm.reset();
+
+      await loadGallery();
+
+    } catch (error) {
+
+      console.error("Gallery upload error:", error);
+
+      galleryMsg.textContent = error.message || "Image upload failed.";
+      galleryMsg.style.color = "red";
+
+    } finally {
+
+      btn.disabled = false;
+      btn.textContent = "Upload Image";
+
+    }
+
+  });
+
+
+  // DELETE GALLERY IMAGE
+  async function deleteGalleryImage(id, btn) {
+
+    if (!confirm("Are you sure you want to permanently delete this image?")) {
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Deleting...";
+
+    try {
+
+      const res = await fetch("/api/gallery", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${currentPassword}`
+        },
+        body: JSON.stringify({ id })
+      });
+
+      if (!res.ok) {
+        throw new Error(await getErrorMessage(res));
+      }
+
+      galleryMsg.textContent = "Image deleted successfully!";
+      galleryMsg.style.color = "#25D366";
+
+      await loadGallery();
+
+    } catch (error) {
+
+      galleryMsg.textContent = error.message || "Error deleting image.";
+      galleryMsg.style.color = "red";
+
+      btn.disabled = false;
+      btn.textContent = "Delete Image";
+
+    }
+
+  }
+
+
+  // ADD REVIEW
+  document.getElementById("reviewForm").addEventListener("submit", async function(e) {
+
+    e.preventDefault();
+
+    const btn = document.getElementById("addBtn");
+
+    btn.disabled = true;
+    btn.textContent = "Adding...";
+
+    const reviewData = {
+      name: document.getElementById("clientName").value.trim(),
+      event: document.getElementById("clientEvent").value.trim(),
+      text: document.getElementById("clientText").value.trim()
+    };
+
+    try {
+
+      const res = await fetch("/api/testimonials", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${currentPassword}`
+        },
+        body: JSON.stringify(reviewData)
+      });
+
+      if (!res.ok) {
+        throw new Error("Unable to add review");
+      }
+
+      adminMsg.textContent = "Review added successfully!";
+      adminMsg.style.color = "#25D366";
+
+      this.reset();
+
+      await loadReviews();
+
+    } catch (error) {
+
+      adminMsg.textContent = "Error adding review.";
+      adminMsg.style.color = "red";
+
+    } finally {
+
+      btn.disabled = false;
+      btn.textContent = "Add Review";
+
+    }
+
+  });
+
+
+  // DELETE REVIEW
+  async function deleteReview(id, btn) {
+
+    if (!confirm("Are you sure you want to delete this review?")) {
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Deleting...";
+
+    try {
+
+      const res = await fetch("/api/testimonials", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${currentPassword}`
+        },
+        body: JSON.stringify({ id })
+      });
+
+      if (!res.ok) {
+        throw new Error("Unable to delete review");
+      }
+
+      adminMsg.textContent = "Review deleted successfully!";
+      adminMsg.style.color = "#25D366";
+
+      await loadReviews();
+
+    } catch (error) {
+
+      adminMsg.textContent = "Error deleting review.";
+      adminMsg.style.color = "red";
+
+      btn.disabled = false;
+      btn.textContent = "Delete Review";
+
+    }
+
+  }
+
+
+  // LOGOUT
+  document.getElementById("logoutBtn").addEventListener("click", function() {
+
+    currentPassword = "";
+
+    document.getElementById("adminPassword").value = "";
+
+    adminPanel.classList.add("admin-hidden");
+    loginPanel.classList.remove("admin-hidden");
+
+    adminMsg.textContent = "";
+    galleryMsg.textContent = "";
+    loginMsg.textContent = "";
+
+    galleryContainer.replaceChildren();
+    reviewContainer.replaceChildren();
+
+  });
+
+</script>
+
 </body>
 </html>

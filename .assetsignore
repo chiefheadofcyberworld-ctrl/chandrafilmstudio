@@ -1,0 +1,8 @@
+worker.js
+wrangler.toml
+reviews-backup.json
+reviews-migrated.json
+reviews-verified.json
+migrate-reviews.cjs
+.wrangler/
+*.map

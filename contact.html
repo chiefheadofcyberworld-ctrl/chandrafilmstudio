@@ -124,7 +124,18 @@
               <input type="text" id="name" placeholder="Your Name" required>
             </div>
             <div class="form-group">
-              <input type="tel" id="phone" placeholder="Phone Number" required>
+             <input
+  type="tel"
+  id="phone"
+  placeholder="10 Digit Phone Number"
+  inputmode="numeric"
+  pattern="[0-9]{10}"
+  minlength="10"
+  maxlength="10"
+  autocomplete="tel"
+  title="Please enter exactly 10 digits"
+  required
+>
             </div>
           </div>
           <div class="form-group">

@@ -95,20 +95,28 @@ document.addEventListener("DOMContentLoaded", function () {
     yearSpan.textContent = new Date().getFullYear();
   }
 
-  /* ---------- 6. GALLERY FILTERING ---------- */
+    /* ---------- 6. GALLERY FILTERING ---------- */
   const filterBtns = document.querySelectorAll(".filter-btn");
-  const galleryItems = document.querySelectorAll(".gallery-item");
+  const galleryGrid = document.getElementById("galleryGrid");
 
-  if (filterBtns.length > 0 && galleryItems.length > 0) {
+  if (filterBtns.length > 0 && galleryGrid) {
     filterBtns.forEach(function (btn) {
       btn.addEventListener("click", function () {
-        filterBtns.forEach(function (b) { b.classList.remove("active"); });
+        filterBtns.forEach(function (b) {
+          b.classList.remove("active");
+        });
+
         btn.classList.add("active");
 
         const filterValue = btn.getAttribute("data-filter");
 
+        // Includes both existing and newly uploaded images
+        const galleryItems = galleryGrid.querySelectorAll(".gallery-item");
+
         galleryItems.forEach(function (item) {
-          if (filterValue === "all" || item.getAttribute("data-category") === filterValue) {
+          const category = item.getAttribute("data-category");
+
+          if (filterValue === "all" || category === filterValue) {
             item.classList.remove("hide");
           } else {
             item.classList.add("hide");
@@ -118,21 +126,30 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+
   /* ---------- 7. LIGHTBOX FUNCTIONALITY ---------- */
-  const galleryLinks = document.querySelectorAll(".gallery-item");
   const lightbox = document.getElementById("lightbox");
   const lightboxImg = document.getElementById("lightboxImg");
   const lightboxClose = document.getElementById("lightboxClose");
 
-  if (lightbox && galleryLinks.length > 0) {
-    galleryLinks.forEach(function (link) {
-      link.addEventListener("click", function (e) {
-        e.preventDefault();
-        const imgSrc = this.querySelector("img").getAttribute("src");
-        lightboxImg.setAttribute("src", imgSrc);
-        lightbox.classList.add("show");
-        document.body.style.overflow = "hidden";
-      });
+  // Event delegation: works for existing and future gallery images
+  if (galleryGrid && lightbox && lightboxImg) {
+    galleryGrid.addEventListener("click", function (e) {
+      const galleryItem = e.target.closest(".gallery-item");
+
+      if (!galleryItem || !galleryGrid.contains(galleryItem)) {
+        return;
+      }
+
+      e.preventDefault();
+
+      const img = galleryItem.querySelector("img");
+
+      if (!img) return;
+
+      lightboxImg.src = img.src;
+      lightbox.classList.add("show");
+      document.body.style.overflow = "hidden";
     });
 
     function closeLightbox() {
@@ -140,90 +157,196 @@ document.addEventListener("DOMContentLoaded", function () {
       document.body.style.overflow = "";
     }
 
-    lightboxClose.addEventListener("click", closeLightbox);
-    
+    if (lightboxClose) {
+      lightboxClose.addEventListener("click", closeLightbox);
+    }
+
     lightbox.addEventListener("click", function (e) {
       if (e.target === lightbox) {
         closeLightbox();
       }
     });
-  }
 
-  /* ---------- 8. ENQUIRY FORM SUBMISSION ---------- */
-  const enquiryForm = document.getElementById("enquiryForm");
-  
-  if (enquiryForm) {
-    enquiryForm.addEventListener("submit", async function (e) {
-      e.preventDefault();
-      
-      console.log("FORM SUBMIT BUTTON CLICKED!");
-
-      const submitBtn = document.getElementById("submitBtn");
-      const formMessage = document.getElementById("formMessage");
-      
-      submitBtn.textContent = "Sending...";
-      submitBtn.disabled = true;
-      formMessage.textContent = "";
-
-      const formData = {
-        name: document.getElementById("name").value,
-        phone: document.getElementById("phone").value,
-        eventType: document.getElementById("eventType").value,
-        message: document.getElementById("message").value,
-      };
-
-      try {
-        const response = await fetch("/api/enquiry", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData)
-        });
-
-        if (response.ok) {
-          formMessage.textContent = "Success! Your enquiry has been sent. We will contact you soon.";
-          formMessage.style.color = "#25D366";
-          enquiryForm.reset();
-        } else {
-          throw new Error("Failed to send");
-        }
-      } catch (error) {
-        console.error("ERROR:", error);
-        formMessage.textContent = "Oops! Something went wrong. Please call us directly.";
-        formMessage.style.color = "#ff4444";
-      } finally {
-        submitBtn.textContent = "Send Enquiry";
-        submitBtn.disabled = false;
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && lightbox.classList.contains("show")) {
+        closeLightbox();
       }
     });
   }
 
-  /* ---------- 9. FETCH DYNAMIC TESTIMONIALS ---------- */
-  const testimonialContainer = document.getElementById("testimonialContainer");
-  
-  if (testimonialContainer) {
-    fetch("/api/testimonials")
-      .then(res => res.json())
-      .then(reviews => {
-        if (reviews.length === 0) {
-          testimonialContainer.innerHTML = `<p style="text-align: center; color: var(--grey);">No reviews yet.</p>`;
-          return;
+
+  /* ---------- 8. LOAD DYNAMIC GALLERY ---------- */
+  if (galleryGrid) {
+    fetch("/api/gallery")
+      .then(function (response) {
+        if (!response.ok) {
+          throw new Error("Gallery API request failed");
         }
-        
-        testimonialContainer.innerHTML = "";
-        
-        reviews.forEach(review => {
-          const blockquote = document.createElement("blockquote");
-          blockquote.className = "testi";
-          blockquote.innerHTML = `
-            <p>"${review.text}"</p>
-            <cite>— ${review.name}, ${review.event}</cite>
-          `;
-          testimonialContainer.appendChild(blockquote);
-        });
+
+        return response.json();
       })
-      .catch(err => {
-        testimonialContainer.innerHTML = `<p style="text-align: center; color: var(--grey);">Failed to load reviews.</p>`;
+      .then(function (images) {
+        if (!Array.isArray(images)) {
+          throw new Error("Invalid gallery response");
+        }
+
+        images.forEach(function (image) {
+          // Validate image URL
+          if (
+            !image.secure_url ||
+            !image.secure_url.startsWith("https://")
+          ) {
+            return;
+          }
+
+          // Convert API category into existing filter category
+          const category = String(image.category || "")
+            .trim()
+            .toLowerCase();
+
+          const galleryItem = document.createElement("a");
+          galleryItem.href = image.secure_url;
+          galleryItem.className = "g-item gallery-item reveal in-view";
+          galleryItem.setAttribute("data-category", category);
+
+          const img = document.createElement("img");
+          img.src = image.secure_url;
+          img.alt = category + " photography by Chandra Film Studio";
+          img.loading = "lazy";
+
+          galleryItem.appendChild(img);
+          galleryGrid.appendChild(galleryItem);
+        });
+
+        console.log("Dynamic gallery loaded:", images.length);
+      })
+      .catch(function (error) {
+        console.error("Dynamic gallery loading failed:", error);
       });
   }
+
+  
+/* ---------- 8. ENQUIRY FORM SUBMISSION ---------- */
+const enquiryForm = document.getElementById("enquiryForm");
+
+if (enquiryForm) {
+  const phoneInput = document.getElementById("phone");
+  const messageInput = document.getElementById("message");
+  const submitBtn = document.getElementById("submitBtn");
+  const formMessage = document.getElementById("formMessage");
+
+  // Allow only numeric digits and maximum 10 characters
+  phoneInput.addEventListener("input", function () {
+    this.value = this.value.replace(/[^0-9]/g, "").slice(0, 10);
+  });
+
+  enquiryForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const phone = phoneInput.value.trim();
+    const message = messageInput.value.trim();
+
+    // Validate exactly 10 digits
+    if (!/^[0-9]{10}$/.test(phone)) {
+      formMessage.textContent = "Please enter exactly 10 digits in your phone number.";
+      formMessage.style.color = "#ff4444";
+      phoneInput.focus();
+      return;
+    }
+
+    // Count words in the message
+    const wordCount = message.split(/\s+/).filter(Boolean).length;
+
+    if (wordCount < 10) {
+      formMessage.textContent = `Your message must contain at least 10 words. Current count: ${wordCount}.`;
+      formMessage.style.color = "#ff4444";
+      messageInput.focus();
+      return;
+    }
+
+    submitBtn.textContent = "Sending...";
+    submitBtn.disabled = true;
+    formMessage.textContent = "";
+
+    const formData = {
+      name: document.getElementById("name").value.trim(),
+      phone: phone,
+      eventType: document.getElementById("eventType").value,
+      message: message
+    };
+
+    try {
+      const response = await fetch("/api/enquiry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+      });
+
+      if (response.ok) {
+        formMessage.textContent =
+          "Success! Your enquiry has been sent. We will contact you soon.";
+        formMessage.style.color = "#25D366";
+        enquiryForm.reset();
+      } else {
+        const result = await response.json().catch(() => ({}));
+        throw new Error(result.error || "Failed to send");
+      }
+    } catch (error) {
+      console.error("Enquiry error:", error);
+      formMessage.textContent =
+        error.message || "Oops! Something went wrong. Please call us directly.";
+      formMessage.style.color = "#ff4444";
+    } finally {
+      submitBtn.textContent = "Send Enquiry";
+      submitBtn.disabled = false;
+    }
+  });
+}
+
+
+  /* ---------- 9. FETCH DYNAMIC TESTIMONIALS ---------- */
+const testimonialContainer = document.getElementById("testimonialContainer");
+
+if (testimonialContainer) {
+  fetch("/api/testimonials", { cache: "no-store" })
+    .then(res => {
+      if (!res.ok) throw new Error("Failed to load reviews");
+      return res.json();
+    })
+    .then(reviews => {
+      testimonialContainer.replaceChildren();
+
+      if (!Array.isArray(reviews) || reviews.length === 0) {
+        const emptyMessage = document.createElement("p");
+        emptyMessage.style.textAlign = "center";
+        emptyMessage.style.color = "var(--grey)";
+        emptyMessage.textContent = "No reviews yet.";
+        testimonialContainer.appendChild(emptyMessage);
+        return;
+      }
+
+      reviews.forEach(review => {
+        const blockquote = document.createElement("blockquote");
+        blockquote.className = "testi";
+
+        const paragraph = document.createElement("p");
+        paragraph.textContent =
+          `"${typeof review.text === "string" ? review.text : ""}"`;
+
+        const cite = document.createElement("cite");
+        const name = typeof review.name === "string" ? review.name : "Unknown";
+        const event = typeof review.event === "string" ? review.event : "";
+
+        cite.textContent = `— ${name}${event ? ", " + event : ""}`;
+
+        blockquote.append(paragraph, cite);
+        testimonialContainer.appendChild(blockquote);
+      });
+    })
+    .catch(error => {
+      console.error("Failed to load testimonials:", error);
+      testimonialContainer.textContent = "Failed to load reviews.";
+    });
+}
 
 }); // <-- Ye aakhri bracket DOMContentLoaded ko band karta hai
