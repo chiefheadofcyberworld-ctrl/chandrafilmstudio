@@ -191,24 +191,33 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         images.forEach(function (image) {
-          if (
-            !image.secure_url ||
-            !image.secure_url.startsWith("https://")
-          ) {
-            return;
-          }
+         let imageUrl;
+
+try {
+  imageUrl = new URL(image.secure_url);
+
+  if (
+    imageUrl.protocol !== "https:" ||
+    imageUrl.hostname !== "res.cloudinary.com" ||
+    !imageUrl.pathname.startsWith("/eri30c2g/image/upload/")
+  ) {
+    return;
+  }
+} catch {
+  return;
+}
 
           const category = String(image.category || "")
             .trim()
             .toLowerCase();
 
           const galleryItem = document.createElement("a");
-          galleryItem.href = image.secure_url;
+         galleryItem.href = imageUrl.href;
           galleryItem.className = "g-item gallery-item reveal in-view";
           galleryItem.setAttribute("data-category", category);
 
           const img = document.createElement("img");
-          img.src = image.secure_url;
+         img.src = imageUrl.href;
           img.alt = category + " photography by Chandra Film Studio";
           img.loading = "lazy";
 
