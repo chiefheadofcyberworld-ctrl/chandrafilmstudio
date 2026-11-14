@@ -283,10 +283,11 @@ if (enquiryForm) {
       });
 
       if (response.ok) {
-        formMessage.textContent =
-          "Success! Your enquiry has been sent. We will contact you soon.";
-        formMessage.style.color = "#25D366";
+        // Redirect only after the server confirms successful enquiry submission.
+        // Google Ads can use /thankyou.html as the post-conversion page URL.
         enquiryForm.reset();
+        window.location.href = "/thankyou.html";
+        return;
       } else {
         const result = await response.json().catch(() => ({}));
         throw new Error(result.error || "Failed to send");
