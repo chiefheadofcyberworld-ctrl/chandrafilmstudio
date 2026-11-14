@@ -1,3 +1,4 @@
+
 /* =========================================================
    CHANDRA FILM STUDIO — Main JavaScript
    ========================================================= */
@@ -15,12 +16,13 @@ document.addEventListener("DOMContentLoaded", function () {
       navToggle.classList.toggle("open");
       nav.classList.toggle("open");
       body.classList.toggle("menu-open");
-      
+
       const isExpanded = navToggle.getAttribute("aria-expanded") === "true";
       navToggle.setAttribute("aria-expanded", !isExpanded);
     });
 
     const navLinks = nav.querySelectorAll(".nav-link");
+
     navLinks.forEach(function (link) {
       link.addEventListener("click", function () {
         navToggle.classList.remove("open");
@@ -33,15 +35,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
   /* ---------- 2. HEADER SCROLL EFFECT ---------- */
   const header = document.getElementById("header");
-  
+
   function handleHeaderScroll() {
+    if (!header) return;
+
     if (window.scrollY > 50) {
       header.classList.add("scrolled");
     } else {
       header.classList.remove("scrolled");
     }
   }
-  
+
   if (header) {
     handleHeaderScroll();
     window.addEventListener("scroll", handleHeaderScroll);
@@ -91,11 +95,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
   /* ---------- 5. AUTO UPDATE FOOTER YEAR ---------- */
   const yearSpan = document.getElementById("year");
+
   if (yearSpan) {
     yearSpan.textContent = new Date().getFullYear();
   }
 
-    /* ---------- 6. GALLERY FILTERING ---------- */
+  /* ---------- 6. GALLERY FILTERING ---------- */
   const filterBtns = document.querySelectorAll(".filter-btn");
   const galleryGrid = document.getElementById("galleryGrid");
 
@@ -109,8 +114,6 @@ document.addEventListener("DOMContentLoaded", function () {
         btn.classList.add("active");
 
         const filterValue = btn.getAttribute("data-filter");
-
-        // Includes both existing and newly uploaded images
         const galleryItems = galleryGrid.querySelectorAll(".gallery-item");
 
         galleryItems.forEach(function (item) {
@@ -126,13 +129,11 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-
   /* ---------- 7. LIGHTBOX FUNCTIONALITY ---------- */
   const lightbox = document.getElementById("lightbox");
   const lightboxImg = document.getElementById("lightboxImg");
   const lightboxClose = document.getElementById("lightboxClose");
 
-  // Event delegation: works for existing and future gallery images
   if (galleryGrid && lightbox && lightboxImg) {
     galleryGrid.addEventListener("click", function (e) {
       const galleryItem = e.target.closest(".gallery-item");
@@ -174,7 +175,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-
   /* ---------- 8. LOAD DYNAMIC GALLERY ---------- */
   if (galleryGrid) {
     fetch("/api/gallery")
@@ -191,7 +191,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         images.forEach(function (image) {
-          // Validate image URL
           if (
             !image.secure_url ||
             !image.secure_url.startsWith("https://")
@@ -199,7 +198,6 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
           }
 
-          // Convert API category into existing filter category
           const category = String(image.category || "")
             .trim()
             .toLowerCase();
@@ -225,129 +223,243 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   }
 
-  
-/* ---------- 8. ENQUIRY FORM SUBMISSION ---------- */
-const enquiryForm = document.getElementById("enquiryForm");
+  /* ---------- 9. ENQUIRY FORM SUBMISSION ---------- */
+  const enquiryForm = document.getElementById("enquiryForm");
 
-if (enquiryForm) {
-  const phoneInput = document.getElementById("phone");
-  const messageInput = document.getElementById("message");
-  const submitBtn = document.getElementById("submitBtn");
-  const formMessage = document.getElementById("formMessage");
+  if (enquiryForm) {
+    const phoneInput = document.getElementById("phone");
+    const messageInput = document.getElementById("message");
+    const submitBtn = document.getElementById("submitBtn");
+    const formMessage = document.getElementById("formMessage");
 
-  // Allow only numeric digits and maximum 10 characters
-  phoneInput.addEventListener("input", function () {
-    this.value = this.value.replace(/[^0-9]/g, "").slice(0, 10);
-  });
-
-  enquiryForm.addEventListener("submit", async function (e) {
-    e.preventDefault();
-
-    const phone = phoneInput.value.trim();
-    const message = messageInput.value.trim();
-
-    // Validate exactly 10 digits
-    if (!/^[0-9]{10}$/.test(phone)) {
-      formMessage.textContent = "Please enter exactly 10 digits in your phone number.";
-      formMessage.style.color = "#ff4444";
-      phoneInput.focus();
-      return;
-    }
-
-    // Count words in the message
-    const wordCount = message.split(/\s+/).filter(Boolean).length;
-
-    if (wordCount < 10) {
-      formMessage.textContent = `Your message must contain at least 10 words. Current count: ${wordCount}.`;
-      formMessage.style.color = "#ff4444";
-      messageInput.focus();
-      return;
-    }
-
-    submitBtn.textContent = "Sending...";
-    submitBtn.disabled = true;
-    formMessage.textContent = "";
-
-    const formData = {
-      name: document.getElementById("name").value.trim(),
-      phone: phone,
-      eventType: document.getElementById("eventType").value,
-      message: message
-    };
-
-    try {
-      const response = await fetch("/api/enquiry", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+    if (phoneInput) {
+      phoneInput.addEventListener("input", function () {
+        this.value = this.value.replace(/[^0-9]/g, "").slice(0, 10);
       });
-
-      if (response.ok) {
-        // Redirect only after the server confirms successful enquiry submission.
-        // Google Ads can use /thankyou.html as the post-conversion page URL.
-        enquiryForm.reset();
-        window.location.href = "/thankyou.html";
-        return;
-      } else {
-        const result = await response.json().catch(() => ({}));
-        throw new Error(result.error || "Failed to send");
-      }
-    } catch (error) {
-      console.error("Enquiry error:", error);
-      formMessage.textContent =
-        error.message || "Oops! Something went wrong. Please call us directly.";
-      formMessage.style.color = "#ff4444";
-    } finally {
-      submitBtn.textContent = "Send Enquiry";
-      submitBtn.disabled = false;
     }
-  });
-}
 
+    enquiryForm.addEventListener("submit", async function (e) {
+      e.preventDefault();
 
-  /* ---------- 9. FETCH DYNAMIC TESTIMONIALS ---------- */
-const testimonialContainer = document.getElementById("testimonialContainer");
+      const phone = phoneInput.value.trim();
+      const message = messageInput.value.trim();
 
-if (testimonialContainer) {
-  fetch("/api/testimonials", { cache: "no-store" })
-    .then(res => {
-      if (!res.ok) throw new Error("Failed to load reviews");
-      return res.json();
-    })
-    .then(reviews => {
-      testimonialContainer.replaceChildren();
-
-      if (!Array.isArray(reviews) || reviews.length === 0) {
-        const emptyMessage = document.createElement("p");
-        emptyMessage.style.textAlign = "center";
-        emptyMessage.style.color = "var(--grey)";
-        emptyMessage.textContent = "No reviews yet.";
-        testimonialContainer.appendChild(emptyMessage);
+      if (!/^[0-9]{10}$/.test(phone)) {
+        formMessage.textContent =
+          "Please enter exactly 10 digits in your phone number.";
+        formMessage.style.color = "#ff4444";
+        phoneInput.focus();
         return;
       }
 
-      reviews.forEach(review => {
-        const blockquote = document.createElement("blockquote");
-        blockquote.className = "testi";
+      const wordCount = message.split(/\s+/).filter(Boolean).length;
 
-        const paragraph = document.createElement("p");
-        paragraph.textContent =
-          `"${typeof review.text === "string" ? review.text : ""}"`;
+      if (wordCount < 10) {
+        formMessage.textContent =
+          `Your message must contain at least 10 words. Current count: ${wordCount}.`;
+        formMessage.style.color = "#ff4444";
+        messageInput.focus();
+        return;
+      }
 
-        const cite = document.createElement("cite");
-        const name = typeof review.name === "string" ? review.name : "Unknown";
-        const event = typeof review.event === "string" ? review.event : "";
+      submitBtn.textContent = "Sending...";
+      submitBtn.disabled = true;
+      formMessage.textContent = "";
 
-        cite.textContent = `— ${name}${event ? ", " + event : ""}`;
+      const formData = {
+        name: document.getElementById("name").value.trim(),
+        phone: phone,
+        eventType: document.getElementById("eventType").value,
+        message: message
+      };
 
-        blockquote.append(paragraph, cite);
-        testimonialContainer.appendChild(blockquote);
-      });
-    })
-    .catch(error => {
-      console.error("Failed to load testimonials:", error);
-      testimonialContainer.textContent = "Failed to load reviews.";
+      try {
+        const response = await fetch("/api/enquiry", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+          enquiryForm.reset();
+          window.location.href = "/thankyou.html";
+          return;
+        } else {
+          const result = await response.json().catch(() => ({}));
+          throw new Error(result.error || "Failed to send");
+        }
+      } catch (error) {
+        console.error("Enquiry error:", error);
+
+        formMessage.textContent =
+          error.message || "Oops! Something went wrong. Please call us directly.";
+
+        formMessage.style.color = "#ff4444";
+      } finally {
+        submitBtn.textContent = "Send Enquiry";
+        submitBtn.disabled = false;
+      }
     });
-}
+  }
 
-}); // <-- Ye aakhri bracket DOMContentLoaded ko band karta hai
+  /* ---------- 10. FETCH DYNAMIC TESTIMONIALS ---------- */
+  const testimonialContainer = document.getElementById("testimonialContainer");
+
+  if (testimonialContainer) {
+    fetch("/api/testimonials", { cache: "no-store" })
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to load reviews");
+        return res.json();
+      })
+      .then(reviews => {
+        testimonialContainer.replaceChildren();
+
+        if (!Array.isArray(reviews) || reviews.length === 0) {
+          const emptyMessage = document.createElement("p");
+          emptyMessage.style.textAlign = "center";
+          emptyMessage.style.color = "var(--grey)";
+          emptyMessage.textContent = "No reviews yet.";
+          testimonialContainer.appendChild(emptyMessage);
+          return;
+        }
+
+        reviews.forEach(review => {
+          const blockquote = document.createElement("blockquote");
+          blockquote.className = "testi";
+
+          const paragraph = document.createElement("p");
+          paragraph.textContent =
+            `"${typeof review.text === "string" ? review.text : ""}"`;
+
+          const cite = document.createElement("cite");
+          const name = typeof review.name === "string" ? review.name : "Unknown";
+          const event = typeof review.event === "string" ? review.event : "";
+
+          cite.textContent = `— ${name}${event ? ", " + event : ""}`;
+
+          blockquote.append(paragraph, cite);
+          testimonialContainer.appendChild(blockquote);
+        });
+      })
+      .catch(error => {
+        console.error("Failed to load testimonials:", error);
+        testimonialContainer.textContent = "Failed to load reviews.";
+      });
+  }
+
+  /* ---------- 11. FLOATING WHATSAPP BUTTON ---------- */
+
+  // Prevent duplicate button if script is loaded more than once
+  if (!document.getElementById("floatingWhatsApp")) {
+
+    // WhatsApp button styling
+    const whatsappStyle = document.createElement("style");
+
+    whatsappStyle.textContent = `
+      #floatingWhatsApp {
+        position: fixed;
+        right: 22px;
+        bottom: 24px;
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #25D366;
+        color: #ffffff;
+        border-radius: 50%;
+        z-index: 9999;
+        text-decoration: none;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+      }
+
+      #floatingWhatsApp:hover {
+        transform: scale(1.1);
+        box-shadow: 0 7px 25px rgba(37, 211, 102, 0.4);
+      }
+
+      #floatingWhatsApp:focus-visible {
+        outline: 3px solid #ffffff;
+        outline-offset: 4px;
+      }
+
+      #floatingWhatsApp svg {
+        width: 34px;
+        height: 34px;
+        fill: currentColor;
+      }
+
+      #floatingWhatsApp .whatsapp-tooltip {
+        position: absolute;
+        right: 72px;
+        background: #111111;
+        color: #ffffff;
+        padding: 9px 13px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-family: Arial, sans-serif;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateX(5px);
+        transition: all 0.25s ease;
+        pointer-events: none;
+      }
+
+      #floatingWhatsApp:hover .whatsapp-tooltip {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(0);
+      }
+
+      @media (max-width: 600px) {
+        #floatingWhatsApp {
+          width: 54px;
+          height: 54px;
+          right: 16px;
+          bottom: calc(18px + env(safe-area-inset-bottom));
+        }
+
+        #floatingWhatsApp svg {
+          width: 30px;
+          height: 30px;
+        }
+
+        #floatingWhatsApp .whatsapp-tooltip {
+          display: none;
+        }
+      }
+    `;
+
+    document.head.appendChild(whatsappStyle);
+
+    // Create WhatsApp button
+    const whatsappButton = document.createElement("a");
+
+    whatsappButton.id = "floatingWhatsApp";
+    whatsappButton.href =
+      "https://wa.me/919798112812?text=" +
+      encodeURIComponent(
+        "Hello Chandra Film Studio! I would like to enquire about your photography and videography services."
+      );
+
+    whatsappButton.target = "_blank";
+    whatsappButton.rel = "noopener noreferrer";
+    whatsappButton.setAttribute("aria-label", "Chat with Chandra Film Studio on WhatsApp");
+    whatsappButton.setAttribute("title", "Chat on WhatsApp");
+
+    whatsappButton.innerHTML = `
+      <span class="whatsapp-tooltip">Chat on WhatsApp</span>
+
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <path d="M16.01 3.2C8.95 3.2 3.21 8.94 3.21 16c0 2.25.59 4.45 1.71 6.39L3.1 28.8l6.56-1.72A12.73 12.73 0 0 0 16 28.8h.01c7.06 0 12.8-5.74 12.8-12.8 0-3.42-1.33-6.63-3.75-9.05A12.72 12.72 0 0 0 16.01 3.2zm0 23.43h-.01c-1.94 0-3.84-.52-5.5-1.51l-.39-.23-3.89 1.02 1.04-3.79-.25-.39a10.6 10.6 0 0 1-1.63-5.73c0-5.86 4.77-10.63 10.64-10.63 2.84 0 5.51 1.11 7.52 3.12a10.57 10.57 0 0 1 3.11 7.52c0 5.86-4.77 10.62-10.64 10.62zm5.84-7.96c-.32-.16-1.89-.93-2.18-1.04-.29-.11-.5-.16-.71.16-.21.32-.82 1.04-1.01 1.25-.18.21-.37.24-.69.08-.32-.16-1.35-.5-2.57-1.59-.95-.85-1.59-1.9-1.77-2.22-.18-.32-.02-.49.14-.65.14-.14.32-.37.48-.56.16-.19.21-.32.32-.53.11-.21.05-.4-.03-.56-.08-.16-.71-1.71-.98-2.34-.26-.61-.52-.53-.71-.54h-.61c-.21 0-.56.08-.85.4-.29.32-1.11 1.09-1.11 2.65s1.14 3.07 1.3 3.28c.16.21 2.24 3.42 5.43 4.8.76.33 1.35.53 1.81.68.76.24 1.45.21 2 .13.61-.09 1.89-.77 2.16-1.51.26-.74.26-1.38.18-1.51-.08-.13-.29-.21-.61-.37z"/>
+      </svg>
+    `;
+
+    document.body.appendChild(whatsappButton);
+
+    console.log("Floating WhatsApp button added successfully!");
+  }
+
+}); // DOMContentLoaded ends here
