@@ -301,11 +301,20 @@
         const card = document.createElement("div");
         card.className = "admin-review";
         
-        card.innerHTML = `
-          <h4 style="color: var(--gold); margin-bottom: 5px;">${review.name || "Unknown"}</h4>
-          <p style="font-size: 0.9rem; color: var(--grey); margin-bottom: 10px;">${review.event || ""}</p>
-          <p style="margin-bottom: 15px;">${review.text || ""}</p>
-        `;
+        const name = document.createElement("h4");
+name.style.color = "var(--gold)";
+name.style.marginBottom = "5px";
+name.textContent = review.name || "Unknown";
+
+const event = document.createElement("p");
+event.style.cssText = "font-size:0.9rem;color:var(--grey);margin-bottom:10px;";
+event.textContent = review.event || "";
+
+const reviewText = document.createElement("p");
+reviewText.style.marginBottom = "15px";
+reviewText.textContent = review.text || "";
+
+card.append(name, event, reviewText);
 
         if (review.id) {
           const deleteBtn = document.createElement("button");
@@ -398,10 +407,16 @@
       images.forEach(item => {
         const card = document.createElement("div");
         card.className = "admin-gallery-card";
-        card.innerHTML = `
-          <img src="${item.secure_url}" alt="Gallery image" loading="lazy">
-          <p style="font-size: 0.85rem; color: var(--grey);">Category: ${item.category || "Unknown"}</p>
-        `;
+       const img = document.createElement("img");
+img.src = item.secure_url;
+img.alt = "Gallery image";
+img.loading = "lazy";
+
+const category = document.createElement("p");
+category.style.cssText = "font-size:0.85rem;color:var(--grey);";
+category.textContent = "Category: " + (item.category || "Unknown");
+
+card.append(img, category);
 
         const deleteBtn = document.createElement("button");
         deleteBtn.className = "delete-btn";
