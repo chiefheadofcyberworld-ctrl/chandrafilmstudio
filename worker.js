@@ -520,7 +520,81 @@ if (url.pathname === "/api/admin/verify") {
 
       return new Response("Method Not Allowed", { status: 405 });
     }
+// Pricing Calculator API
+if (url.pathname === "/api/pricing") {
 
+  // Fetch Rates (Public)
+  if (request.method === "GET") {
+    try {
+      const rates = await env.TESTIMONIALS_KV.get("pricing_rates");
+
+      return new Response(rates || "{}", {
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store"
+        }
+      });
+
+    } catch (error) {
+      return jsonResponse({ error: "Unable to fetch pricing rates" }, 500);
+    }
+  }
+
+  // Update Rates (Admin Only)
+  if (request.method === "POST") {
+
+    if (!isAdmin(request, env)) {
+      return jsonResponse({ error: "Unauthorized" }, 401);
+    }
+
+    try {
+      const newRates = await request.json();
+
+      if (
+        !newRates ||
+        typeof newRates !== "object" ||
+        Array.isArray(newRates)
+      ) {
+        return jsonResponse({ error: "Invalid pricing data" }, 400);
+      }
+
+      // Temporary structural validation.
+      // Exact allowed fields and numeric limits must match your calculator.
+      const entries = Object.entries(newRates);
+
+      if (entries.length === 0 || entries.length > 30) {
+        return jsonResponse({ error: "Invalid number of pricing entries" }, 400);
+      }
+
+      for (const [key, value] of entries) {
+        if (
+          !/^[a-zA-Z0-9_-]{1,50}$/.test(key) ||
+          typeof value !== "number" ||
+          !Number.isFinite(value) ||
+          value < 0 ||
+          value > 10000000
+        ) {
+          return jsonResponse({ error: "Invalid pricing entry" }, 400);
+        }
+      }
+
+      await env.TESTIMONIALS_KV.put(
+        "pricing_rates",
+        JSON.stringify(newRates)
+      );
+
+      return jsonResponse({ success: true });
+
+    } catch (error) {
+      return jsonResponse({ error: "Invalid request or server error" }, 400);
+    }
+  }
+
+  return new Response("Method Not Allowed", {
+    status: 405,
+    headers: { "Allow": "GET, POST" }
+  });
+}
     // ---------- WEBSITE ASSETS ----------
     return env.ASSETS.fetch(request);
   }

@@ -181,14 +181,61 @@
           </div>
         </section>
 
-        <!-- TAB 3: CALCULATOR PRICING (FUTURE) -->
-        <section id="section-calculator" class="tab-section">
-          <div class="admin-card" style="text-align: center; padding: 50px;">
-            <h3 style="color: var(--gold); margin-bottom: 20px;">Calculator Pricing Manager</h3>
-            <p style="color: var(--grey); margin-bottom: 20px;">Yahan se aap website ke calculator ke rates aur categories set kar payenge.</p>
-            <p style="color: #ff4444; font-weight: bold;">(Coming Soon - Backend Under Development)</p>
-          </div>
-        </section>
+        
+<!-- TAB 3: CALCULATOR PRICING -->
+<section id="section-calculator" class="tab-section">
+  <div class="admin-card">
+    <h3>Set Calculator Rates (₹)</h3>
+
+    <p style="color: var(--grey); margin-bottom: 20px; font-size: 0.9rem;">
+      Yahan set kiye gaye rates website ke Custom Calculator me dikhenge.
+    </p>
+
+    <form id="pricingForm">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+
+        <div>
+          <label for="rate-wedding" style="color: var(--gold);">Wedding</label>
+          <input type="number" id="rate-wedding" class="form-control"
+            placeholder="e.g. 15000" min="0" max="10000000" step="1" required>
+        </div>
+
+        <div>
+          <label for="rate-prewedding" style="color: var(--gold);">Pre-Wedding</label>
+          <input type="number" id="rate-prewedding" class="form-control"
+            placeholder="e.g. 12000" min="0" max="10000000" step="1" required>
+        </div>
+
+        <div>
+          <label for="rate-events" style="color: var(--gold);">Events</label>
+          <input type="number" id="rate-events" class="form-control"
+            placeholder="e.g. 8000" min="0" max="10000000" step="1" required>
+        </div>
+
+        <div>
+          <label for="rate-portrait" style="color: var(--gold);">Portrait</label>
+          <input type="number" id="rate-portrait" class="form-control"
+            placeholder="e.g. 5000" min="0" max="10000000" step="1" required>
+        </div>
+
+        <div>
+          <label for="rate-brandshoot" style="color: var(--gold);">Brand Shoot</label>
+          <input type="number" id="rate-brandshoot" class="form-control"
+            placeholder="e.g. 20000" min="0" max="10000000" step="1" required>
+        </div>
+
+      </div>
+
+      <button type="submit" class="btn btn-gold btn-sm"
+        id="savePricingBtn" style="margin-top: 20px;">
+        Save Rates
+      </button>
+    </form>
+
+    <p id="pricingMsg" style="margin-top: 15px; font-weight: bold;"></p>
+  </div>
+</section>
+
 
       </div>
     </main>
@@ -263,7 +310,11 @@
       adminPanel.classList.add("active");
       adminPanel.style.display = "flex";
 
-      await Promise.all([loadReviews(), loadGallery()]);
+      await Promise.all([
+  loadReviews(),
+  loadGallery(),
+  loadPricingRates()
+]);
     } catch (error) {
       loginMsg.textContent = "Incorrect password. Please try again.";
     } finally {
@@ -510,6 +561,96 @@ card.append(img, category);
       btn.disabled = false; btn.textContent = "Delete Image";
     }
   }
+
+  // --- 10. PRICING CALCULATOR LOGIC ---
+
+  async function loadPricingRates() {
+    try {
+      const res = await fetch("/api/pricing", {
+        cache: "no-store"
+      });
+
+      if (!res.ok) throw new Error("Failed to load rates");
+
+      const rates = await res.json();
+
+      document.getElementById("rate-wedding").value = rates.Wedding ?? "";
+      document.getElementById("rate-prewedding").value = rates.PreWedding ?? "";
+      document.getElementById("rate-events").value = rates.Events ?? "";
+      document.getElementById("rate-portrait").value = rates.Portrait ?? "";
+      document.getElementById("rate-brandshoot").value = rates.BrandShoot ?? "";
+
+    } catch (error) {
+      console.error("Could not load pricing rates:", error);
+    }
+  }
+
+  // Save Pricing Rates
+  document.getElementById("pricingForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const btn = document.getElementById("savePricingBtn");
+    const msg = document.getElementById("pricingMsg");
+
+    if (!currentPassword) {
+      msg.textContent = "Please login again.";
+      msg.style.color = "red";
+      return;
+    }
+
+    const fields = [
+      "rate-wedding",
+      "rate-prewedding",
+      "rate-events",
+      "rate-portrait",
+      "rate-brandshoot"
+    ];
+
+    for (const id of fields) {
+      const input = document.getElementById(id);
+
+      if (!input.checkValidity()) {
+        input.reportValidity();
+        return;
+      }
+    }
+
+    const newRates = {
+      Wedding: Number(document.getElementById("rate-wedding").value),
+      PreWedding: Number(document.getElementById("rate-prewedding").value),
+      Events: Number(document.getElementById("rate-events").value),
+      Portrait: Number(document.getElementById("rate-portrait").value),
+      BrandShoot: Number(document.getElementById("rate-brandshoot").value)
+    };
+
+    btn.disabled = true;
+    btn.textContent = "Saving...";
+    msg.textContent = "";
+
+    try {
+      const res = await fetch("/api/pricing", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${currentPassword}`
+        },
+        body: JSON.stringify(newRates)
+      });
+
+      if (!res.ok) throw new Error("Could not save rates");
+
+      msg.textContent = "Rates updated successfully!";
+      msg.style.color = "#25D366";
+
+    } catch (error) {
+      msg.textContent = "Error saving rates. Please try again.";
+      msg.style.color = "red";
+
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Save Rates";
+    }
+  });
 
 </script>
 </body>

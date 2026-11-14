@@ -159,7 +159,56 @@
 
     </div>
   </section>
+  <!-- ================= DYNAMIC CALCULATOR ================= -->
+  <section class="section" style="background: var(--black-soft); border-top: 1px solid var(--line);">
+    <div class="container">
+      <div class="section-head reveal">
+        <h2 class="section-title">Build Your <span class="gold">Custom Package</span></h2>
+        <p class="section-sub">Select the services you need and get an instant estimate.</p>
+      </div>
 
+      <div class="calculator-box reveal">
+        <div class="calc-options">
+          
+          <label class="calc-item">
+            <input type="checkbox" class="calc-checkbox" value="Wedding" data-price-id="rate-wedding">
+            <span class="calc-name">Wedding Photography</span>
+            <span class="calc-price" id="calc-price-wedding">₹0</span>
+          </label>
+
+          <label class="calc-item">
+            <input type="checkbox" class="calc-checkbox" value="PreWedding" data-price-id="rate-prewedding">
+            <span class="calc-name">Pre-Wedding Shoot</span>
+            <span class="calc-price" id="calc-price-prewedding">₹0</span>
+          </label>
+
+          <label class="calc-item">
+            <input type="checkbox" class="calc-checkbox" value="Events" data-price-id="rate-events">
+            <span class="calc-name">Events & Birthdays</span>
+            <span class="calc-price" id="calc-price-events">₹0</span>
+          </label>
+
+          <label class="calc-item">
+            <input type="checkbox" class="calc-checkbox" value="Portrait" data-price-id="rate-portrait">
+            <span class="calc-name">Portrait Session</span>
+            <span class="calc-price" id="calc-price-portrait">₹0</span>
+          </label>
+
+          <label class="calc-item">
+            <input type="checkbox" class="calc-checkbox" value="BrandShoot" data-price-id="rate-brandshoot">
+            <span class="calc-name">Brand / Commercial Shoot</span>
+            <span class="calc-price" id="calc-price-brandshoot">₹0</span>
+          </label>
+
+        </div>
+
+        <div class="calc-total-box">
+          <h3>Estimated Total: <span class="gold" id="calc-total-price">₹0</span></h3>
+          <a href="#" id="calc-wa-btn" class="btn btn-gold" target="_blank" rel="noopener">Book on WhatsApp</a>
+        </div>
+      </div>
+    </div>
+  </section>
   <!-- ================= CUSTOM CTA ================= -->
   <section class="cta-band" style="padding: 80px 0;">
     <div class="container cta-inner reveal">

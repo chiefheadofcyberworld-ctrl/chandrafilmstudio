@@ -471,4 +471,128 @@ try {
     console.log("Floating WhatsApp button added successfully!");
   }
 
+/* ---------- 12. DYNAMIC PRICING CALCULATOR ---------- */
+
+const calcCheckboxes = document.querySelectorAll(".calc-checkbox");
+const calcTotalPrice = document.getElementById("calc-total-price");
+const calcWaBtn = document.getElementById("calc-wa-btn");
+
+let globalRates = {};
+
+if (document.querySelector(".calculator-box")) {
+
+  // Fetch pricing rates from API
+  async function loadPricingRates() {
+    try {
+      const res = await fetch("/api/pricing", {
+        cache: "no-store"
+      });
+
+      if (!res.ok) {
+        throw new Error("Unable to fetch pricing rates");
+      }
+
+      const rates = await res.json();
+
+      const allowedKeys = [
+        "Wedding",
+        "PreWedding",
+        "Events",
+        "Portrait",
+        "BrandShoot"
+      ];
+
+      allowedKeys.forEach(key => {
+        const value = rates[key];
+
+        globalRates[key] =
+          typeof value === "number" &&
+          Number.isFinite(value) &&
+          value >= 0
+            ? value
+            : 0;
+      });
+
+      // Update individual service prices
+      document.getElementById("calc-price-wedding").textContent =
+        `₹${globalRates.Wedding.toLocaleString("en-IN")}`;
+
+      document.getElementById("calc-price-prewedding").textContent =
+        `₹${globalRates.PreWedding.toLocaleString("en-IN")}`;
+
+      document.getElementById("calc-price-events").textContent =
+        `₹${globalRates.Events.toLocaleString("en-IN")}`;
+
+      document.getElementById("calc-price-portrait").textContent =
+        `₹${globalRates.Portrait.toLocaleString("en-IN")}`;
+
+      document.getElementById("calc-price-brandshoot").textContent =
+        `₹${globalRates.BrandShoot.toLocaleString("en-IN")}`;
+
+      // Recalculate after rates are loaded
+      calculateTotal();
+
+    } catch (error) {
+      console.error("Pricing API error:", error);
+    }
+  }
+
+  // Calculate selected services
+  function calculateTotal() {
+    let total = 0;
+    let selectedServices = [];
+
+    calcCheckboxes.forEach(cb => {
+      if (cb.checked) {
+        const rateKey = cb.value;
+        const price = globalRates[rateKey] || 0;
+
+        total += price;
+
+        selectedServices.push(
+          cb.parentElement.querySelector(".calc-name").textContent.trim()
+        );
+      }
+    });
+
+    // Update estimated total
+    calcTotalPrice.textContent =
+      `₹${total.toLocaleString("en-IN")}`;
+
+    // Update WhatsApp booking link
+    if (selectedServices.length > 0) {
+
+      const formattedTotal = total.toLocaleString("en-IN");
+
+      const waText =
+        `Hello Chandra Film Studio, I built a custom package on your website.\n\n` +
+        `Selected Services:\n- ${selectedServices.join("\n- ")}\n\n` +
+        `Estimated Total: ₹${formattedTotal}\n\n` +
+        `Please share exact details and availability.`;
+
+      calcWaBtn.href =
+        `https://wa.me/919798112812?text=${encodeURIComponent(waText)}`;
+
+      calcWaBtn.style.opacity = "1";
+      calcWaBtn.style.pointerEvents = "auto";
+
+    } else {
+
+      calcWaBtn.href = "#";
+      calcWaBtn.style.opacity = "0.5";
+      calcWaBtn.style.pointerEvents = "none";
+
+    }
+  }
+
+  // Listen for checkbox changes
+  calcCheckboxes.forEach(cb => {
+    cb.addEventListener("change", calculateTotal);
+  });
+
+  // Initial calculation and API loading
+  calculateTotal();
+  loadPricingRates();
+}
+
 }); // DOMContentLoaded ends here
